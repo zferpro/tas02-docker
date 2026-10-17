@@ -1,0 +1,75 @@
+version: '3.8'
+
+networks:
+  cms_net:
+    driver: bridge
+
+volumes:
+  wp_uploads:
+    driver: local
+
+services:
+  wordpress1:
+    image: wordpress:6.6-php8.3-apache
+    container_name: cms_backend_1
+    restart: always
+    dns:
+      - 10.33.199.17
+    environment:
+      WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
+      WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
+      WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
+      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_HOME', 'https://' . $_ENV['DOMAIN']);
+        define('WP_SITEURL', 'https://' . $_ENV['DOMAIN']);
+        if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+            $_SERVER['HTTPS'] = 'on';
+        }
+    volumes:
+      - wp_uploads:/var/www/html/wp-content/uploads
+    networks:
+      - cms_net
+    expose:
+      - "80"
+
+  wordpress2:
+    image: wordpress:6.6-php8.3-apache
+    container_name: cms_backend_2
+    restart: always
+    dns:
+      - 10.33.199.17
+    environment:
+      WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
+      WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
+      WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
+      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_HOME', 'https://' . $_ENV['DOMAIN']);
+        define('WP_SITEURL', 'https://' . $_ENV['DOMAIN']);
+        if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+            $_SERVER['HTTPS'] = 'on';
+        }
+    volumes:
+      - wp_uploads:/var/www/html/wp-content/uploads
+    networks:
+      - cms_net
+    expose:
+      - "80"
+
+  haproxy:
+    image: haproxy:2.8-alpine
+    container_name: cms_haproxy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8404:8404"
+    volumes:
+      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - ./haproxy/certs:/etc/ssl/haproxy:ro
+    depends_on:
+      - wordpress1
+      - wordpress2
+    networks:
+      - cms_net

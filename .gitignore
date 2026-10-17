@@ -1,0 +1,15 @@
+# Secretos y variables de entorno
+.env
+*.env
+*.env.local
+
+# Certificados TLS/SSL y claves privadas
+*.pem
+*.key
+*.crt
+docker/haproxy/certs/*
+!docker/haproxy/certs/.gitkeep
+
+# Logs y temporales
+*.log
+.DS_Store
