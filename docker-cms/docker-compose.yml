@@ -1,5 +1,3 @@
-version: '3.8'
-
 networks:
   cms_net:
     driver: bridge
@@ -21,10 +19,10 @@ services:
       WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
       WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
       WORDPRESS_CONFIG_EXTRA: |
-        define('WP_HOME', 'https://' . $_ENV['DOMAIN']);
-        define('WP_SITEURL', 'https://' . $_ENV['DOMAIN']);
-        if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
-            $_SERVER['HTTPS'] = 'on';
+        define('WP_HOME', 'https://' . $${_ENV}['DOMAIN']);
+        define('WP_SITEURL', 'https://' . $${_ENV}['DOMAIN']);
+        if (isset($${_SERVER}['HTTP_X_FORWARDED_PROTO']) && $${_SERVER}['HTTP_X_FORWARDED_PROTO'] === 'https') {
+            $${_SERVER}['HTTPS'] = 'on';
         }
     volumes:
       - wp_uploads:/var/www/html/wp-content/uploads
@@ -45,10 +43,10 @@ services:
       WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
       WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
       WORDPRESS_CONFIG_EXTRA: |
-        define('WP_HOME', 'https://' . $_ENV['DOMAIN']);
-        define('WP_SITEURL', 'https://' . $_ENV['DOMAIN']);
-        if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
-            $_SERVER['HTTPS'] = 'on';
+        define('WP_HOME', 'https://' . $${_ENV}['DOMAIN']);
+        define('WP_SITEURL', 'https://' . $${_ENV}['DOMAIN']);
+        if (isset($${_SERVER}['HTTP_X_FORWARDED_PROTO']) && $${_SERVER}['HTTP_X_FORWARDED_PROTO'] === 'https') {
+            $${_SERVER}['HTTPS'] = 'on';
         }
     volumes:
       - wp_uploads:/var/www/html/wp-content/uploads
