@@ -8,7 +8,7 @@ volumes:
 
 services:
   wordpress1:
-    image: wordpress:6.6-php8.3-apache
+    image: wordpress:7.1.3-php8.3-apache
     container_name: cms_backend_1
     restart: always
     dns:
@@ -32,7 +32,7 @@ services:
       - "80"
 
   wordpress2:
-    image: wordpress:6.6-php8.3-apache
+    image: wordpress:7.1.3-php8.3-apache
     container_name: cms_backend_2
     restart: always
     dns:

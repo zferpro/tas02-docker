@@ -1,15 +1,9 @@
-# Secretos y variables de entorno
+# Ignorar variables de entorno
 .env
-*.env
-*.env.local
 
-# Certificados TLS/SSL y claves privadas
+# Ignorar certificados y llaves privadas de SSL
 *.pem
 *.key
 *.crt
-docker/haproxy/certs/*
-!docker/haproxy/certs/.gitkeep
-
-# Logs y temporales
-*.log
-.DS_Store
+haproxy/certs/*
+!haproxy/certs/.gitkeep

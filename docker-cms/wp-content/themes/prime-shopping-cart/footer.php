@@ -1,0 +1,26 @@
+<?php
+/**
+ * The template for displaying the footer
+ *
+ * Contains the closing of the #content div and all content after.
+ *
+ * @link https://developer.wordpress.org/themes/basics/template-files/#template-partials
+ *
+ * @package Prime_Shopping_Cart
+ */
+
+?>
+
+<?php
+	/**
+	* Hook - joyas_shop_site_footer
+	*
+	* @hooked joyas_shop_container_wrap_start
+	*/
+	do_action( 'prime_shopping_cart_site_footer');
+	?>
+</div>
+<?php wp_footer(); ?>
+
+</body>
+</html>

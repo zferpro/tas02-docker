@@ -1,0 +1,30 @@
+.prime-message {
+	overflow: hidden;
+	position: relative;
+	border-left-color: #2ea2cc !important;
+	background: #fff!important;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.10)!important;
+}
+.prime-message a.button-primary,
+.prime-message a.button-secondary {
+	text-decoration: none !important;
+}
+.prime-message a.prime-message-close {
+	position: absolute;
+	top: 0;
+	right: 0;
+	padding: 10px 15px 10px 21px;
+	font-size: 13px;
+	line-height: 1.23076923;
+	text-decoration: none;
+}
+.prime-message a.prime-message-close:before {
+	position: absolute;
+	top: 8px;
+	left: 0;
+	-webkit-transition: all .1s ease-in-out;
+	transition: all .1s ease-in-out;
+}
+.e-conversion-banner{
+	display: none!important;
+}

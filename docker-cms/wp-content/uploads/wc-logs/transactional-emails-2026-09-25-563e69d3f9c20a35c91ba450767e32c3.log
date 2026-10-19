@@ -1,0 +1,2 @@
+2026-09-25T17:49:15+00:00 WARNING Email "new_order" for order #1373 failed to send: No se ha podido establecer la función de correo. CONTEXT: {"email_type":"new_order","status":"failed","recipient":"wp_admin","order":1373}
+2026-09-25T17:49:15+00:00 WARNING Email "customer_on_hold_order" for order #1373 failed to send: No se ha podido establecer la función de correo. CONTEXT: {"email_type":"customer_on_hold_order","status":"failed","recipient":"wp_admin","order":1373}
