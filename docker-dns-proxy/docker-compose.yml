@@ -1,0 +1,27 @@
+services:
+  bind9:
+    image: ubuntu/bind9:9.18-24.04_edge
+    container_name: dns_bind9
+    restart: always
+    environment:
+      - BIND9_USER=bind
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+    volumes:
+      - ./bind/named.conf:/etc/bind/named.conf:ro
+      - ./bind/named.conf.options:/etc/bind/named.conf.options:ro
+      - ./bind/named.conf.local:/etc/bind/named.conf.local:ro
+      - ./bind/zones:/etc/bind/zones:ro
+
+  haproxy:
+    image: haproxy:2.8-alpine
+    container_name: cms_haproxy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8404:8404"
+    volumes:
+      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - ./haproxy/certs:/etc/ssl/haproxy:ro

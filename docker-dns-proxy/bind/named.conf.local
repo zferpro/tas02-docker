@@ -1,0 +1,9 @@
+zone "tas02.lab" {
+    type master;
+    file "/etc/bind/zones/db.tas02.lab";
+};
+
+zone "199.33.10.in-addr.arpa" {
+    type master;
+    file "/etc/bind/zones/db.10.33.199";
+};

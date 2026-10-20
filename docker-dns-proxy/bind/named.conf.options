@@ -1,0 +1,24 @@
+acl "trusted"{
+     10.33.199.16/29; // segmento de red privado
+     127.0.0.1; 
+     10.33.195.0/24;  // segmento de red labs
+     10.33.0.0/16;    // segmento de red VPN
+     10.33.21.0/24;   // segmento labs 2
+};
+options {
+	directory "/var/cache/bind";
+        recursion yes;
+        allow-recursion { trusted; };
+        allow-query{ any; };
+        allow-query-cache{ any; };
+
+        listen-on { any };
+        listen-on-v6 { none; };
+        forwarders {
+		8.8.8.8;
+                1.1.1.1;
+	 };
+
+	dnssec-validation auto;
+};
+

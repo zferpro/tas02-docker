@@ -1,0 +1,16 @@
+$TTL    604800
+@       IN      SOA     dns.tas02.lab. admin.tas02.lab. (
+                     1910202601         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+; Servidor de Nombres (NS)
+@       IN      NS      dns.tas02.lab.
+
+; Registros PTR (IP a Nombre)
+17      IN      PTR     dns.tas02.lab.
+18      IN      PTR     cms.tas02.lab.
+19      IN      PTR     db.tas02.lab.
+20      IN      PTR     cms2.tas02.lab.
