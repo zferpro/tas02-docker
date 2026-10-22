@@ -4,7 +4,7 @@ volumes:
     driver_opts:
       type: nfs
       o: "addr=10.33.199.19,rw,nfsvers=4,async"
-      device: ":/shared/uploads"
+      device: ":/"
 
 services:
   wordpress:
