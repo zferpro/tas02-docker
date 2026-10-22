@@ -1,22 +1,26 @@
 # 🚀 Proyecto Nodo Sur - Plataforma Web Resiliente con Docker
 
-Este `README.md` explica de forma clara y directa cómo está estructurado nuestro proyecto para la asignatura **Taller de Administración de Sistemas (TAS02)**. La idea es que todo el equipo pueda entender qué hace cada servidor, cómo se conectan las piezas y cómo levantar todo el entorno de 0 a 100 sin complicaciones.
+Este `README.md` explica de forma clara y directa cómo está estructurado nuestro proyecto para la asignatura **Taller de Administración de Sistemas (TAS02)**. Está pensado para que cualquier integrante del equipo pueda entender la arquitectura, saber qué hace cada servidor y levantar todo el entorno de 0 a 100 sin complicaciones.
+
+> 🔒 **Nota de Seguridad:** En este repositorio **no se incluyen contraseñas ni llaves privadas**. Todas las credenciales reales de la base de datos, accesos administradores y claves SSH se gestionan mediante variables de entorno local (`.env`) y se encuentran respaldadas en nuestro documento privado de equipo.
+> 
+> 
 
 ---
 
 ## 💡 ¿De qué se trata la arquitectura?
 
-El objetivo del proyecto es desplegar una plataforma web en **WordPress** corriendo de forma distribuida sobre **4 Máquinas Virtuales (MVs)** para garantizar tolerancia a fallas y continuidad operacional.
+El objetivo es desplegar un sitio web en **WordPress** corriendo de forma distribuida sobre **4 Máquinas Virtuales (MVs)** para garantizar tolerancia a fallas y alta disponibilidad.
 
-Toda la solución está empaquetada en **contenedores Docker** y se organiza en 3 repositorios/capas principales:
+Toda la solución funciona en **contenedores Docker** organizados en 3 capas/repositorios principales:
 
 1. **DNS y Proxy Inverso (`docker-dns-proxy`)**:
 
 
-* Un contenedor con **BIND9** se encarga de la resolución de nombres de dominio locales (`nodosur.tas02.lab`).
+* **BIND9**: Resuelve de forma local el nombre de dominio (`nodosur.tas02.lab`).
 
 
-* Un contenedor con **HAProxy** recibe el tráfico seguro HTTPS (puerto 443), gestiona los certificados SSL y distribuye las peticiones entre los dos servidores web mediante balanceo de carga.
+* **HAProxy**: Recibe el tráfico seguro en el puerto HTTPS (443), gestiona los certificados SSL y distribuye las visitas entre los dos servidores web.
 
 
 
@@ -24,10 +28,10 @@ Toda la solución está empaquetada en **contenedores Docker** y se organiza en 
 2. **Base de Datos y Almacenamiento Compartido (`docker-db`)**:
 
 
-* Un contenedor con **MariaDB 10.11** almacena de manera centralizada la base de datos del sitio (`wordpress_db`).
+* **MariaDB 10.11**: Guarda de forma centralizada la base de datos (`wordpress_db`).
 
 
-* Un contenedor con un **Servidor NFS** comparte la carpeta multimedia/subidas (`wp-content/uploads`).
+* **Servidor NFS**: Comparte la carpeta de archivos e imágenes (`wp-content/uploads`) entre ambos nodos web para que siempre estén sincronizados.
 
 
 
@@ -35,10 +39,10 @@ Toda la solución está empaquetada en **contenedores Docker** y se organiza en 
 3. **Servidores Web CMS (`docker-cms`)**:
 
 
-* Dos MVs independientes ejecutan un contenedor de **WordPress** cada una.
+* Dos MVs independientes, cada una ejecutando un contenedor de **WordPress**.
 
 
-* Ambos nodos se conectan a la misma base de datos centralizada y montan de forma nativa el mismo almacenamiento compartido NFS.
+* Ambos nodos se conectan a la misma base de datos remota y montan de forma nativa el mismo volumen NFS compartido.
 
 
 
@@ -48,43 +52,38 @@ Toda la solución está empaquetada en **contenedores Docker** y se organiza en 
 
 ## 🗺️ Mapa de Red e Infraestructura
 
-El segmento de red privado utilizado para el proyecto es `10.33.199.16/29` y la infraestructura se organiza de la siguiente manera:
+La red privada asignada al proyecto es `10.33.199.16/29` y se distribuye así:
 
-| Máquina Virtual | IP LAN | Rol de la MV | Contenedores Docker Desplegados |
+| Máquina Virtual | IP LAN | Rol en el Sistema | Contenedores Docker |
 | --- | --- | --- | --- |
-| **`dns-tas02`** | `10.33.199.17` | Servidor DNS y Proxy | `dns_bind9` (Puerto 53) + `cms_haproxy` (Puertos 80, 443)
+| **`dns-tas02`** | `10.33.199.17` | DNS Autoritativo y Proxy | `dns_bind9` (Puerto 53) + `cms_haproxy` (Puertos 80, 443)
 
  |
-| **`cms-tas02` (CMS 1)** | `10.33.199.18` | Backend Web #1 | `cms_backend_1` (WordPress en Puerto 80)
+| **`cms-tas02` (CMS 1)** | `10.33.199.18` | Servidor Web #1 | `cms_backend_1` (WordPress en Puerto 80)
 
  |
 | **`db-tas02`** | `10.33.199.19` | Base de Datos + NFS | `db_mariadb` (Puerto 3306) + `shared_nfs` (Puerto 2049)
 
  |
-| **`cms2-tas02` (CMS 2)** | `10.33.199.20` | Backend Web #2 | `cms_backend_2` (WordPress en Puerto 80)
+| **`cms2-tas02` (CMS 2)** | `10.33.199.20` | Servidor Web #2 | `cms_backend_2` (WordPress en Puerto 80)
 
  |
 
 ---
 
-## 🛠️ Guía de Despliegue Paso a Paso
+## 🛠️ Guía de Despliegue de 0 a 100%
 
-Para desplegar la infraestructura completa desde cero de manera ordenada, se recomienda seguir la secuencia listada a continuación.
+Para asegurar que todo inicie correctamente y sin errores de dependencia, **debemos seguir estrictamente este orden**:
 
 ---
 
-### 1️⃣ Servidor de Base de Datos y Almacenamiento (`docker-db`)
+### Paso 1: Base de Datos y Servidor NFS (`docker-db`)
 
 * **Servidor destino:** Máquina Virtual `db-tas02` (`10.33.199.19`).
 
 
-* **Función:** Provee el servicio de base de datos MariaDB y expone la carpeta de archivos mediante un servidor NFS contenerizado.
 
-
-
-**Comandos para desplegar:**
-
-1. Clonar el repositorio y acceder al directorio:
+1. Clonar el repositorio y entrar a la carpeta:
 
 
 ```bash
@@ -95,32 +94,41 @@ cd docker-db
 ```
 
 
-2. Crear el archivo de variables de entorno `.env`:
+2. Crear el archivo `.env` basándose en la plantilla de ejemplo:
+
+
+```bash
+cp .env.example .env
+
+```
+
+
+Configuración del `.env` (completar con las claves acordadas del documento privado):
 
 
 ```ini
-MYSQL_ROOT_PASSWORD=triplef
+MYSQL_ROOT_PASSWORD=<CONTRASEÑA_ROOT_AQUI>
 MYSQL_DATABASE=wordpress_db
 MYSQL_USER=wp_user
-MYSQL_PASSWORD=triplef
+MYSQL_PASSWORD=<CONTRASEÑA_USUARIO_AQUI>
 ```[cite: 1, 4]
 
 ```
 
 
-3. Ejecutar el script de pre-configuración:
+3. Dar permisos y ejecutar el pre-setup:
 
 
 ```bash
 chmod +x setup.sh post-setup.sh
 ./setup.sh
 ```[cite: 1]
-*(Este script carga los módulos NFS en el kernel del host y ajusta los permisos de almacenamiento para el usuario `www-data` con UID `33:33`)[cite: 1, 4].*
+*(Carga los módulos NFS en el kernel de la MV y prepara la carpeta de imágenes con permisos para el usuario `www-data` - UID `33:33`)[cite: 1, 4].*
 
 ```
 
 
-4. Iniciar los contenedores:
+4. Levantar los contenedores:
 
 
 ```bash
@@ -130,13 +138,13 @@ docker compose up -d
 ```
 
 
-5. Ejecutar el script de post-configuración:
+5. Ejecutar el post-setup:
 
 
 ```bash
 ./post-setup.sh
 ```[cite: 1]
-*(Valida el inicio de MariaDB, realiza la importación idempotente del respaldo `backup_wordpress.sql` y verifica la copia de los archivos multimedia)[cite: 1, 4].*
+*(Espera a que MariaDB responda, importa automáticamente la base de datos `backup_wordpress.sql` y verifica la copia de los archivos multimedia)[cite: 1, 4].*
 
 
 ```
@@ -145,18 +153,13 @@ docker compose up -d
 
 ---
 
-### 2️⃣ Servidor DNS y Proxy Inverso (`docker-dns-proxy`)
+### Paso 2: DNS y Proxy Inverso (`docker-dns-proxy`)
 
 * **Servidor destino:** Máquina Virtual `dns-tas02` (`10.33.199.17`).
 
 
-* **Función:** Resuelve el dominio local `nodosur.tas02.lab` y gestiona la terminación TLS/HTTPS balanceando el tráfico hacia los nodos CMS.
 
-
-
-**Comandos para desplegar:**
-
-1. Detener el servicio BIND nativo del host para liberar el puerto 53:
+1. Detener el servicio BIND nativo de la máquina para no ocupar el puerto 53:
 
 
 ```bash
@@ -167,7 +170,7 @@ sudo systemctl disable bind9
 ```
 
 
-2. Entrar a la carpeta del repositorio y generar el certificado SSL:
+2. Acceder a la carpeta del proyecto y generar el certificado SSL autosignado:
 
 
 ```bash
@@ -175,12 +178,12 @@ cd /home/tas02/docker-dns-proxy
 chmod +x setup.sh
 ./setup.sh
 ```[cite: 1]
-*(Genera automáticamente el certificado autosignado `nodosur.pem` para HAProxy)[cite: 1].*
+*(Crea de forma local el archivo `nodosur.pem` para que HAProxy pueda recibir conexiones HTTPS protegidas)[cite: 1].*
 
 ```
 
 
-3. Levantar la pila de contenedores con Docker Compose:
+3. Levantar los contenedores:
 
 
 ```bash
@@ -194,18 +197,13 @@ docker compose up -d
 
 ---
 
-### 3️⃣ Servidores Web CMS (`docker-cms`)
+### Paso 3: Servidores Web CMS (`docker-cms`)
 
 * **Servidores destino:** Máquinas Virtuales `cms-tas02` (`10.33.199.18`) y `cms2-tas02` (`10.33.199.20`).
 
 
-* **Función:** Ejecutan el servicio de WordPress conectándose a la base de datos remota (`db.tas02.lab:3306`) y montan el volumen nativo NFS de Docker para los archivos subidos.
 
-
-
-**Comandos para desplegar en cada servidor CMS:**
-
-1. Instalar las utilidades cliente de NFS en el sistema operativo host:
+1. Instalar la herramienta de NFS en el sistema de la MV host:
 
 
 ```bash
@@ -215,43 +213,43 @@ sudo apt update && sudo apt install -y nfs-common
 ```
 
 
-2. Acceder al repositorio y crear el archivo `.env`:
+2. Clonar el repo y preparar el `.env` según corresponda:
 
 
 ```bash
 cd /home/tas02/tas02-docker/docker-cms/
 cp .env.example .env
 ```[cite: 4]
-* **Para la MV CMS 1 (`10.33.199.18`):**[cite: 3, 4]
+* **En la MV CMS 1 (`10.33.199.18`):**[cite: 3, 4]
   ```ini
   CONTAINER_NAME=cms_backend_1
   DOMAIN=nodosur.tas02.lab
   WORDPRESS_DB_HOST=db.tas02.lab:3306
   WORDPRESS_DB_NAME=wordpress_db
   WORDPRESS_DB_USER=wp_user
-  WORDPRESS_DB_PASSWORD=triplef
+  WORDPRESS_DB_PASSWORD=<CONTRASEÑA_USUARIO_AQUI>
   ```[cite: 3, 4]
-* **Para la MV CMS 2 (`10.33.199.20`):**[cite: 3, 4]
+* **En la MV CMS 2 (`10.33.199.20`):**[cite: 3, 4]
   ```ini
   CONTAINER_NAME=cms_backend_2
   DOMAIN=nodosur.tas02.lab
   WORDPRESS_DB_HOST=db.tas02.lab:3306
   WORDPRESS_DB_NAME=wordpress_db
   WORDPRESS_DB_USER=wp_user
-  WORDPRESS_DB_PASSWORD=triplef
+  WORDPRESS_DB_PASSWORD=<CONTRASEÑA_USUARIO_AQUI>
   ```[cite: 3, 4]
 
 ```
 
 
-3. Ejecutar el script de despliegue automatizado:
+3. Ejecutar el script de despliegue:
 
 
 ```bash
 chmod +x setup.sh
 ./setup.sh
 ```[cite: 1, 4]
-*(Inicia el contenedor, monta el volumen NFS, sincroniza temas y plugins y asegura la propiedad de archivos a `www-data`)[cite: 1, 3, 4].*
+*(Inicia WordPress, monta el volumen NFS, copia temas/plugins y ajusta los permisos para `www-data`)[cite: 1, 3, 4].*
 
 
 ```
@@ -260,12 +258,10 @@ chmod +x setup.sh
 
 ---
 
-## 🔍 Comprobación y Verificación del Sistema
+## 🔍 Comprobaciones para Confirmar que Todo Funciona
 
-Para confirmar la correcta operación del entorno multicontenedor, se pueden ejecutar los siguientes comandos:
-
-* **Prueba de acceso web HTTPS:**
-Acceder desde un cliente a [https://nodosur.tas02.lab](https://www.google.com/search?q=https://nodosur.tas02.lab) o ejecutar en consola:
+* **Acceso HTTPS:**
+Entrar desde el navegador a `[https://nodosur.tas02.lab](https://nodosur.tas02.lab)` o probar en consola:
 
 
 ```bash
@@ -275,22 +271,22 @@ curl -Ivk https://nodosur.tas02.lab
 ```
 
 
-* **Prueba de sincronización en tiempo real del almacenamiento NFS:**
-1. Crear un archivo de prueba desde la MV del primer backend con el usuario `www-data`:
+* **Sincronización NFS en Tiempo Real:**
+1. Crear un archivo desde el contenedor en CMS1 simulando al usuario web:
 
 
 ```bash
-docker exec -u www-data -it cms_backend_1 touch /var/www/html/wp-content/uploads/sincronia_test.txt
+docker exec -u www-data -it cms_backend_1 touch /var/www/html/wp-content/uploads/test_equipo.txt
 ```[cite: 1]
 
 ```
 
 
-2. Verificar la presencia inmediata del archivo desde el contenedor en la segunda MV:
+2. Verificar que aparezca inmediatamente dentro del contenedor de CMS2:
 
 
 ```bash
-docker exec -it cms_backend_2 ls -la /var/www/html/wp-content/uploads/sincronia_test.txt
+docker exec -it cms_backend_2 ls -la /var/www/html/wp-content/uploads/test_equipo.txt
 ```[cite: 1]
 
 ```
@@ -298,7 +294,7 @@ docker exec -it cms_backend_2 ls -la /var/www/html/wp-content/uploads/sincronia_
 
 
 
-(La visualización del archivo confirma la coherencia de datos en tiempo real entre ambos backends).
+(Si el archivo aparece listado, el almacenamiento compartido está 100% operativo).
 
 
 
