@@ -5,6 +5,8 @@ echo "========================================================="
 echo "   [POST-SETUP] Verificando estado y permisos de servicios "
 echo "========================================================="
 # 1. Verificar si los contenedores están arriba
+ if [ -f .env ]; then export $(grep -v '^#' .env | grep -v '^$' | xargs) fi
+
 echo "[1/5] Estado de los contenedores Docker:"
 docker compose ps
 
@@ -29,7 +31,7 @@ fi
 
 if [ -d "./uploads" ] && [ "$(ls -A ./uploads 2>/dev/null)" ]; then
     echo "[3/5] Copiando archivos iniciales desde ./uploads a ./data/uploads/..."
-    cp -r ./uploads/* ./data/uploads/
+    sudo cp -r ./uploads/* ./data/uploads/
     echo " -> Archivos multimedia copiados exitosamente."
 else
     echo "[3/5] No se detectaron archivos previos en ./uploads. Se creará una carpeta limpia."
