@@ -19,7 +19,7 @@ services:
     restart: always
     privileged: true
     environment:
-      NFS_EXPORTS: "/shared/uploads *(rw,sync,no_subtree_check,no_root_squash)"
+      NFS_EXPORT_0: "/shared/uploads *(rw,sync,no_subtree_check,no_root_squash,fsid=0)"
     ports:
       - "2049:2049"
       - "2049:2049/udp"
