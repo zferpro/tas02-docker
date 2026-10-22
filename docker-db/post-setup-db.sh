@@ -5,7 +5,9 @@ echo "========================================================="
 echo "   [POST-SETUP] Verificando estado y permisos de servicios "
 echo "========================================================="
 # 1. Verificar si los contenedores están arriba
- if [ -f .env ]; then export $(grep -v '^#' .env | grep -v '^$' | xargs) fi
+if [ -f .env ]; then 
+   export $(grep -v '^#' .env | grep -v '^$' | xargs)
+fi
 
 echo "[1/5] Estado de los contenedores Docker:"
 docker compose ps
