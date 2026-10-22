@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-
+#Exit inmediatamente si un comando falla
+set -e
 # Obtener la ruta absoluta del directorio del script
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CERTS_DIR="$SCRIPT_DIR/haproxy/certs"
@@ -32,3 +33,7 @@ if [ ! -f "$PEM_FILE" ]; then
 else
     echo "El certificado $PEM_FILE ya existe. Omitiendo generacion."
 fi
+
+# Construir y lanzar los contenedores
+echo "Construyendo y lanzando los contenedores..."
+docker compose up -d

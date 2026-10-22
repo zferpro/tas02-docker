@@ -1,0 +1,27 @@
+services:
+  mariadb:
+    image: mariadb:10.11
+    container_name: db_mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+
+  nfs_server:
+    image: erichough/nfs-server
+    container_name: shared_nfs
+    restart: always
+    privileged: true
+    environment:
+      NFS_EXPORTS: "/shared/uploads *(rw,sync,no_subtree_check,no_root_squash)"
+    ports:
+      - "2049:2049"
+      - "2049:2049/udp"
+    volumes:
+      - ./data/uploads:/shared/uploads
