@@ -33,7 +33,8 @@ if [ ! -f "$PEM_FILE" ]; then
 else
     echo "El certificado $PEM_FILE ya existe. Omitiendo generacion."
 fi
-
+chmod 755 "$SCRIPT_DIR/haproxy/certs"
+chmod 644 "$CERTS_DIR/nodosur.pem"
 # Construir y lanzar los contenedores
 echo "Construyendo y lanzando los contenedores..."
 docker compose up -d
