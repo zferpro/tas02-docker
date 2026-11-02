@@ -28,4 +28,38 @@ services:
         }
     volumes:
       - wp_uploads:/var/www/html/wp-content/uploads
+  node_exporter:
+    image: prom/node-exporter:v1.12.1
+    container_name: node_exporter
+    restart: always
+    network_mode: host
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
 
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.51.0
+    container_name: cadvisor
+    restart: always
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+  
+  apache_exporter:
+    image: lusotycoon/apache-exporter:v1.1.1
+    container_name: apache_exporter
+    restart: always
+    ports:
+      - "9117:9117"
+    command:
+      - "--scrape_uri=http://localhost/server-status?auto"

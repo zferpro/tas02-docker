@@ -1,0 +1,46 @@
+groups:
+  - name: Alertas_NodoSur
+    rules:
+      # 1. Alerta de caída de Backend CMS
+      - alert: BackendCMSDown
+        expr: haproxy_server_status{backend="wp_backends"} == 0
+        for: 10s
+        labels:
+          severity: critical
+          responsable: sysadmin
+        annotations:
+          summary: "Un backend web de WordPress ha caído"
+          description: "El backend {{ $labels.server }} en HAProxy no responde a los health checks."
+
+      # 2. Alerta de capacidad de disco / NFS
+      - alert: DiscoNFSProximoALlenarse
+        expr: (node_filesystem_free_bytes{mountpoint=~".*uploads.*"} / node_filesystem_size_bytes) * 100 < 15
+        for: 1m
+        labels:
+          severity: warning
+          responsable: storage_admin
+        annotations:
+          summary: "Almacenamiento NFS bajo en capacidad"
+          description: "El espacio libre en el volumen NFS de la BD es menor al 15%."
+
+      # 3. Alerta de saturación de CPU en MVs
+      - alert: CPUSaturada
+        expr: 100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[2m])) * 100) > 85
+        for: 2m
+        labels:
+          severity: warning
+          responsable: sysadmin
+        annotations:
+          summary: "Saturación de CPU en {{ $labels.instance }}"
+          description: "El uso de CPU supera el 85% durante más de 2 minutos."
+
+      # 4. Alerta de falla en Base de Datos MariaDB
+      - alert: MariaDBDown
+        expr: mysql_up == 0
+        for: 5s
+        labels:
+          severity: critical
+          responsable: dba
+        annotations:
+          summary: "Servicio MariaDB fuera de línea"
+          description: "El contenedor de Base de Datos en 10.33.199.19 no responde."

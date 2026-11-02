@@ -1,0 +1,76 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+rule_files:
+  - "alert.rules.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['localhost:9093']
+
+scrape_configs:
+  # 0. Prometheus
+  - job_name: 'prometheus_self'
+    static_configs:
+      - targets: ['localhost:9090']
+  
+  # 1. Nodos (MVs Host)
+  - job_name: 'node-exporters'
+    static_configs:
+      - targets:
+          - '10.33.199.17:9100' # dns-tas02
+          - '10.33.199.18:9100' # cms-tas02
+          - '10.33.199.19:9100' # db-tas02
+          - '10.33.199.20:9100' # cms2-tas02
+          - '10.33.199.21:9100' # prom-tas02 
+  
+  # 2. Contenedores Docker (cAdvisor)
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets:
+          - '10.33.199.17:8080'
+          - '10.33.199.18:8080'
+          - '10.33.199.19:8080'
+          - '10.33.199.20:8080'
+          - '10.33.199.21:8080'
+
+  # 3. HAProxy Metrics
+  - job_name: 'haproxy'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['10.33.199.17:8404']
+
+  # 4. BIND9 DNS Exporter
+  - job_name: 'bind9'
+    static_configs:
+      - targets: ['10.33.199.17:9119']
+
+  # 5. MariaDB Exporter
+  - job_name: 'mariadb'
+    static_configs:
+      - targets: ['10.33.199.19:9104']
+
+  # 6. Apache / WordPress Backends
+  - job_name: 'apache_backends'
+    static_configs:
+      - targets:
+          - '10.33.199.18:9117' # CMS1
+          - '10.33.199.20:9117' # CMS2
+
+  # 7. Blackbox Probe (Prueba de Salud Sintética HTTPS)
+  - job_name: 'blackbox_http'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+          - https://nodosur.tas02.lab
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: 10.33.199.17:9115 

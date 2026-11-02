@@ -25,3 +25,41 @@ services:
       - "10.33.199.19:2049:2049/udp"
     volumes:
       - ./data/uploads:/shared/uploads
+
+  node_exporter:
+    image: prom/node-exporter:v1.12.1
+    container_name: node_exporter
+    restart: always
+    network_mode: host
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.51.0
+    container_name: cadvisor
+    restart: always
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+
+  mysqld_exporter:
+    image: prom/mysqld-exporter:v0.21.0
+    container_name: db_exporter
+    restart: always
+    environment:
+      DATA_SOURCE_NAME: "${MYSQL_EXPORTERNAME_PASS}@(db_mariadb:3306)/"
+    ports:
+      - "9104:9104"
+    depends_on:
+      - mariadb
