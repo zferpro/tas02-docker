@@ -12,7 +12,7 @@ fi
 echo "[1/5] Estado de los contenedores Docker:"
 docker compose ps
 
-SQL_FILE="backup_wordpress.sql"
+SQL_FILE="${MYSQL_NAME_BACKUP}"
 ROOT_PASS="${MYSQL_ROOT_PASSWORD}"
 if [ -f "$SQL_FILE" ]; then
     echo "[2/5] Verificando si la base de datos requiere importación..."

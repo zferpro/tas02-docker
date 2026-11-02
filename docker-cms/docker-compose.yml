@@ -14,7 +14,7 @@ services:
     dns:
       - 10.33.199.17
     ports:
-      - "80:80"
+      - "${CONTAINER_IP}:80:80"
     environment:
       WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
       WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}

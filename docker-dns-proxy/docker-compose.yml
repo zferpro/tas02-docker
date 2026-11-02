@@ -6,8 +6,10 @@ services:
     environment:
       - BIND9_USER=bind
     ports:
-      - "53:53/tcp"
-      - "53:53/udp"
+      - "10.33.199.17:53:53/tcp"
+      - "10.33.199.17:53:53/udp"
+      - "10.33.195.253:53:53/tcp"
+      - "10.33.195.253:53:53/udp"
     volumes:
       - ./bind/named.conf:/etc/bind/named.conf:ro
       - ./bind/named.conf.options:/etc/bind/named.conf.options:ro
@@ -19,9 +21,12 @@ services:
     container_name: cms_haproxy
     restart: always
     ports:
-      - "80:80"
-      - "443:443"
-      - "8404:8404"
+      - "10.33.199.17:80:80"
+      - "10.33.199.17:443:443"
+      - "10.33.199.17:8404:8404"
+      - "10.33.195.253:80:80"
+      - "10.33.195.253:443:443"
+      - "10.33.195.253:8404:8404"
     volumes:
       - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
       - ./haproxy/certs:/etc/ssl/haproxy:ro

@@ -9,7 +9,7 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
-      - "3306:3306"
+      - "10.33.199.19:3306:3306"
     volumes:
       - ./data/mysql:/var/lib/mysql
 
@@ -21,7 +21,7 @@ services:
     environment:
       NFS_EXPORT_0: "/shared/uploads *(rw,sync,no_subtree_check,no_root_squash,fsid=0)"
     ports:
-      - "2049:2049"
-      - "2049:2049/udp"
+      - "10.33.199.19:2049:2049"
+      - "10.33.199.19:2049:2049/udp"
     volumes:
       - ./data/uploads:/shared/uploads
