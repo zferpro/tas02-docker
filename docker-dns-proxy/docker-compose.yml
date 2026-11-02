@@ -10,6 +10,7 @@ services:
       - "10.33.199.17:53:53/udp"
       - "10.33.195.253:53:53/tcp"
       - "10.33.195.253:53:53/udp"
+      - "127.0.0.1:8053:8053"
     volumes:
       - ./bind/named.conf:/etc/bind/named.conf:ro
       - ./bind/named.conf.options:/etc/bind/named.conf.options:ro
