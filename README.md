@@ -1,4 +1,12 @@
 # 🚀 Proyecto Nodo Sur - Plataforma Web Resiliente con Docker
+COSAS QUE FALTAN:
+- Crear archivo .my.cnf.example con variables de ejemplo
+- Actualizar el script para generar este archivo automaticamente
+
+
+
+
+
 
 Este `README.md` explica de forma clara y directa cómo está estructurado nuestro proyecto para la asignatura **Taller de Administración de Sistemas (TAS02)**. Está pensado para que cualquier integrante del equipo pueda entender la arquitectura, saber qué hace cada servidor y levantar todo el entorno de 0 a 100 sin complicaciones.
 
