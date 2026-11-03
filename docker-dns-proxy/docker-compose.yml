@@ -34,7 +34,7 @@ services:
 
   #ads image: prom/node-exporter:v1.12.1
   node_exporter:
-    image: prom/node-exporter:v1.12.1
+    image: quay.io/prometheus/node-exporter:v1.12.1
     container_name: node_exporter
     restart: always
     network_mode: host
@@ -61,7 +61,7 @@ services:
       - /dev/disk/:/dev/disk:ro
   
   bind_exporter:
-    image: prom/bind-exporter:v0.8.0
+    image: prometheuscommunity/bind-exporter:v0.8.0
     container_name: bind_exporter
     restart: always
     ports:
