@@ -16,5 +16,7 @@ db.tas02.lab.     IN      A       10.33.199.19
 cms2.tas02.lab.   IN      A       10.33.199.20
 prom.tas02.lab.    IN      A       10.33.199.21
 
+prometheus.tas02.lab.  IN      A       10.33.199.17
+prometheus.tas02.lab.  IN      A       10.33.195.253
 nodosur.tas02.lab.     IN      A       10.33.199.17
 nodosur.tas02.lab.     IN      A       10.33.195.253
