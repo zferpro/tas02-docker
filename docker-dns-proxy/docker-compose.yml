@@ -6,10 +6,8 @@ services:
     environment:
       - BIND9_USER=bind
     ports:
-      - "10.33.199.17:53:53/tcp"
-      - "10.33.199.17:53:53/udp"
-      - "10.33.195.253:53:53/tcp"
-      - "10.33.195.253:53:53/udp"
+      - "53:53/tcp"
+      - "53:53/udp"
     volumes:
       - ./bind/named.conf:/etc/bind/named.conf:ro
       - ./bind/named.conf.options:/etc/bind/named.conf.options:ro
@@ -21,12 +19,9 @@ services:
     container_name: cms_haproxy
     restart: always
     ports:
-      - "10.33.199.17:80:80"
-      - "10.33.199.17:443:443"
-      - "10.33.199.17:8404:8404"
-      - "10.33.195.253:80:80"
-      - "10.33.195.253:443:443"
-      - "10.33.195.253:8404:8404"
+      - "80:80"
+      - "443:443"
+      - "8404:8404"
     volumes:
       - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
       - ./haproxy/certs:/etc/ssl/haproxy:ro
@@ -45,13 +40,14 @@ services:
       - '--path.procfs=/host/proc'
       - '--path.sysfs=/host/sys'
       - '--path.rootfs=/rootfs'
+      - '--web.listen-address=10.33.199.17:9100'
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.51.0
     container_name: cadvisor
     restart: always
     ports:
-      - "8080:8080"
+      - "10.33.199.17:8080:8080"
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
@@ -64,6 +60,6 @@ services:
     container_name: bind_exporter
     restart: always
     ports:
-      - "9119:9119"
+      - "10.33.199.17:9119:9119"
     command:
       - "--bind.stats-url=http://bind9:8053/"
