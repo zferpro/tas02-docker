@@ -39,18 +39,25 @@ download_from_drive() {
 
     rm -f /tmp/gcookie
 }
-
-# 2. Iniciar contenedores con build. Si la construcción falla, set -e aborta la ejecución
-echo "[1/5] Iniciar y construir contenedores con Docker Compose..."
-docker compose up -d --build
-
-echo " -> Estado actual de los servicios:"
-docker compose ps
-
 # Definición de variables clave
 SQL_FILE="${MYSQL_NAME_BACKUP:-backup_wordpress.sql}"
 ROOT_PASS="${MYSQL_ROOT_PASSWORD}"
 DB_NAME="${MYSQL_DATABASE}"
+
+# 2. Iniciar contenedores con build. Si la construcción falla, set -e aborta la ejecución
+echo "[1/5] Iniciar y construir contenedores con Docker Compose..."
+docker compose up -d --build
+echo " -> Esperando a que MariaDB complete la inicialización del primer arranque..."
+until [ "$(docker inspect -f '{{.State.Health.Status}}' db_mariadb 2>/dev/null)" == "healthy" ]; do
+    echo " -> Inicializando motor de base de datos, esperando 3 segundos..."
+    sleep 3
+done
+echo " -> MariaDB está completamente operativa (State: healthy)."
+echo " -> Estado actual de los servicios:"
+docker compose ps
+
+
+docker exec db_mariadb mariadb -u root --password="${ROOT_PASS}" -e "CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\`;"
 
 # 3. Verificar si la base de datos requiere importación
 echo "[2/5] Verificando si la base de datos requiere importación..."

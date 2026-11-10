@@ -12,6 +12,12 @@ services:
       - "10.33.199.19:3306:3306"
     volumes:
       - ./data/mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 3s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   nfs_server:
     image: erichough/nfs-server
