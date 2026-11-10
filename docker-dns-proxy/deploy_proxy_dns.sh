@@ -38,3 +38,4 @@ chmod 644 "$CERTS_DIR/nodosur.pem"
 # Construir y lanzar los contenedores
 echo "Construyendo y lanzando los contenedores..."
 docker compose up -d
+echo "nameserver 10.33.199.17" | sudo tee /etc/resolv.conf
