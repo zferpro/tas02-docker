@@ -63,4 +63,4 @@ services:
     ports:
       - "${CONTAINER_IP}:9117:9117"
     command:
-      - "--scrape_uri=http://${CONTAINER_NAME}:9117/server-status?auto"
+      - "--scrape_uri=http://${CONTAINER_NAME}:80/server-status?auto"

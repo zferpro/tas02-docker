@@ -5,11 +5,6 @@ global:
 rule_files:
   - "alert.rules.yml"
 
-alerting:
-  alertmanagers:
-    - static_configs:
-        - targets: ['localhost:9093']
-
 scrape_configs:
   # 0. Prometheus
   - job_name: 'prometheus_self'

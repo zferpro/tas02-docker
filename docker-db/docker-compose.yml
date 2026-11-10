@@ -58,6 +58,8 @@ services:
     image: prom/mysqld-exporter:v0.21.0
     container_name: db_exporter
     restart: always
+    command:
+      - "--config.my-cnf=/.my.cnf"
     volumes:
       - ./.my.cnf:/.my.cnf
     ports:
