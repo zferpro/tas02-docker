@@ -1,0 +1,4 @@
+[client]
+user=exporter_example
+password=pass_example
+host=mariadb

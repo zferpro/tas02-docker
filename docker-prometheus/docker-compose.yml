@@ -28,13 +28,14 @@ services:
       - '--path.procfs=/host/proc'
       - '--path.sysfs=/host/sys'
       - '--path.rootfs=/rootfs'
+      - '--web.listen-address=10.33.199.21:9100'
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.51.0
     container_name: cadvisor
     restart: always
     ports:
-      - "8080:8080"
+      - "10.33.199.21:8080:8080"
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:ro

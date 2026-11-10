@@ -21,12 +21,11 @@ services:
     ports:
       - "0.0.0.0:80:80"
       - "0.0.0.0:443:443"
-      - "0.0.0.0:8404:8404"
+      - "10.33.199.17:8404:8404"
     volumes:
       - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
       - ./haproxy/certs:/etc/ssl/haproxy:ro
 
-  #ads image: prom/node-exporter:v1.12.1
   node_exporter:
     image: prom/node-exporter:v1.12.1
     container_name: node_exporter
@@ -62,4 +61,4 @@ services:
     ports:
       - "10.33.199.17:9119:9119"
     command:
-      - "--bind.stats-url=http://bind9:8053/"
+      - "--bind.stats-url=http://bind9:9119/" # 8053?
