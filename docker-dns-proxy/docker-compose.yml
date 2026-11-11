@@ -45,6 +45,7 @@ services:
     image: gcr.io/cadvisor/cadvisor:v0.51.0
     container_name: cadvisor
     restart: always
+    privileged: true
     ports:
       - "10.33.199.17:8080:8080"
     volumes:
@@ -53,6 +54,8 @@ services:
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
   
   bind_exporter:
     image: prometheuscommunity/bind-exporter:v0.8.0
