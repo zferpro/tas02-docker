@@ -1,6 +1,6 @@
 # 🚀 Proyecto Nodo Sur - Plataforma Web Resiliente con Docker
 COSAS QUE FALTAN:
-- ver el tema del grafana
+- ver el tema del grafana y las alertas
 - hacer un grafico o esquema de la topologia de red completa
 
 # git add .
