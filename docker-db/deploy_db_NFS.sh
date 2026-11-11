@@ -7,15 +7,14 @@ echo "   [DEPLOY-DB-NFS] Despliegue de DB y Almacenamiento NFS  "
 echo "========================================================="
 
 # 1. Cargar variables de entorno desde el archivo .env primero
-if [ -f .env ]; then 
-   export $(grep -v '^#' .env | grep -v '^$' | xargs)
-else
-   echo " -> [ERROR] No se encontró el archivo .env en el directorio actual."
-   exit 1
+if [ ! -f .env ]; then 
+    echo " -> [ERROR] No se encontró el archivo .env en el directorio actual."
+    exit 1
 fi
 
-# Función helper para descargar desde Google Drive superando la pantalla de confirmación de virus
+export $(grep -v '^#' .env | grep -v '^$' | xargs)
 
+# Función helper para descargar desde Google Drive
 download_from_drive() {
     local url="$1"
     local output_file="$2"
@@ -29,6 +28,7 @@ download_from_drive() {
     echo " -> Descargando archivo con gdown (ID: ${file_id})..."
     python3 -m gdown "${file_id}" -O "${output_file}"
 }
+
 # Definición de variables clave
 SQL_FILE="${MYSQL_NAME_BACKUP:-backup_wordpress.sql}"
 ROOT_PASS="${MYSQL_ROOT_PASSWORD}"
@@ -45,7 +45,6 @@ done
 echo " -> MariaDB está completamente operativa (State: healthy)."
 echo " -> Estado actual de los servicios:"
 docker compose ps
-
 
 docker exec db_mariadb mariadb -u root --password="${ROOT_PASS}" -e "CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\`;"
 
@@ -88,6 +87,14 @@ if [ -z "$(ls -A ./uploads 2>/dev/null)" ]; then
         echo " -> Descomprimiendo uploads.tar.gz en ./uploads..."
         tar -xzf uploads.tar.gz -C ./uploads
         rm -f uploads.tar.gz
+
+        # Aplanar si el .tar.gz contiene internamente una subcarpeta 'uploads'
+        if [ -d "./uploads/uploads" ]; then
+            echo " -> Aplanando subcarpeta anidada en ./uploads..."
+            mv ./uploads/uploads/* ./uploads/ 2>/dev/null || true
+            rm -rf ./uploads/uploads
+        fi
+
         echo " -> Descompresión realizada con éxito."
     else
         echo " -> [AVISO] ./uploads está vacío y no se definió LINK_DOWNLOAD_UPLOADS."
@@ -97,14 +104,23 @@ fi
 # Copiar archivos hacia la ruta compartida montada en el contenedor NFS
 if [ "$(ls -A ./uploads 2>/dev/null)" ]; then
     echo " -> Copiando archivos desde ./uploads a ./data/uploads/..."
-    sudo cp -r ./uploads/* ./data/uploads/
+    sudo cp -a ./uploads/. ./data/uploads/
+    
+    # Desanidar en ./data/uploads por resguardo si existía la carpeta anidada de ejecuciones anteriores
+    if [ -d "./data/uploads/uploads" ]; then
+        echo " -> Aplanando subcarpeta anidada en ./data/uploads..."
+        sudo mv ./data/uploads/uploads/* ./data/uploads/ 2>/dev/null || true
+        sudo rm -rf ./data/uploads/uploads
+    fi
+
     echo " -> Archivos multimedia copiados exitosamente a ./data/uploads/."
 fi
 
 # 5. Corregir recursivamente los permisos para el usuario www-data (UID 33)
 echo "[4/5] Corrigiendo recursivamente propiedad UID 33 (www-data) en ./data/uploads..."
 sudo chown -R 33:33 ./data/uploads
-sudo chmod -R 775 ./data/uploads
+sudo find ./data/uploads -type d -exec chmod 775 {} +
+sudo find ./data/uploads -type f -exec chmod 664 {} +
 
 # 6. Comprobación de escucha en los puertos 3306 (MariaDB) y 2049 (NFS)
 echo "[5/5] Verificando escucha de puertos en la red (3306 y 2049):"
