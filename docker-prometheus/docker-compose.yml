@@ -43,6 +43,12 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
 
+networks:
+  prom_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/24
 volumes:
   prometheus_data:
     driver: local

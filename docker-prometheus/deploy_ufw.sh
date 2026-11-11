@@ -21,7 +21,9 @@ sudo ufw allow from 10.33.21.0/24 to any port 22 proto tcp
 sudo ufw allow from 10.33.199.16/29 to 10.33.199.21 port 8080 proto tcp
 sudo ufw allow from 10.33.199.16/29 to 10.33.199.21 port 9100 proto tcp
 sudo ufw allow from 10.33.199.16/29 to 10.33.199.21 port 9090 proto tcp
-
+# --- Servicios de docker 
+sudo ufw allow from 172.28.0.0/24 to 10.33.199.21 port 9100 proto tcp
+sudo ufw allow from 172.28.0.0/24 to 10.33.199.21 port 8080 proto tcp
 echo "[4/4] Habilitando UFW..."
 sudo ufw --force enable
 sudo ufw status verbose
