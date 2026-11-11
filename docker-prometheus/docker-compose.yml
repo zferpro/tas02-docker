@@ -2,6 +2,8 @@ services:
   prometheus:
     image: prom/prometheus:v3.15.0
     container_name: prometheus_server
+    networks:
+      - prom_net    
     restart: always
     ports:
       - "10.33.199.21:9090:9090"
