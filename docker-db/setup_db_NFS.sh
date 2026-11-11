@@ -11,7 +11,8 @@ echo "========================================================="
 echo "[1/5] Verificando y cargando módulos NFS en el Kernel..."
 sudo modprobe nfs || true
 sudo modprobe nfsd || true
-
+sudo apt update && sudo apt install -y python3-pip
+pip install gdown --break-system-packages 2>/dev/null || pip install gdown || pip3 install gdown
 # Asegurar que se carguen automáticamente si la MV se reinicia
 if ! grep -q "^nfs\b" /etc/modules 2>/dev/null; then
     echo "nfs" | sudo tee -a /etc/modules > /dev/null

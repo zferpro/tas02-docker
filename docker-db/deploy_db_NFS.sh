@@ -15,11 +15,10 @@ else
 fi
 
 # Función helper para descargar desde Google Drive superando la pantalla de confirmación de virus
+
 download_from_drive() {
     local url="$1"
     local output_file="$2"
-    
-    # Extraer el FILE_ID de la URL de Drive (soporta formatos id=... o /d/ID)
     local file_id=$(echo "$url" | grep -oP '(id=|\/d\/)\K[a-zA-Z0-9_-]+')
     
     if [ -z "$file_id" ]; then
@@ -27,17 +26,8 @@ download_from_drive() {
         return 1
     fi
 
-    # 1. Intentar obtener el token de confirmación por si excede el límite de escaneo de virus
-    local confirm=$(curl -sc /tmp/gcookie "https://drive.google.com/uc?export=download&id=${file_id}" | grep -oP 'confirm=\K[^&]*' || true)
-
-    # 2. Si existe token, descargar con confirm; si no, hacer descarga directa normal
-    if [ -n "$confirm" ]; then
-        curl -Lb /tmp/gcookie "https://drive.google.com/uc?export=download&confirm=${confirm}&id=${file_id}" -o "$output_file"
-    else
-        curl -Lb /tmp/gcookie "https://drive.google.com/uc?export=download&id=${file_id}" -o "$output_file"
-    fi
-
-    rm -f /tmp/gcookie
+    echo " -> Descargando archivo con gdown (ID: ${file_id})..."
+    python3 -m gdown "${file_id}" -O "${output_file}"
 }
 # Definición de variables clave
 SQL_FILE="${MYSQL_NAME_BACKUP:-backup_wordpress.sql}"
