@@ -6,8 +6,11 @@ set -e
 echo "=================================================="
 echo "   [DEPLOY-CMS] Despliegue Automatizado CMS       "
 echo "=================================================="
+
+# Asegurar instalación de gdown
 sudo apt update && sudo apt install -y python3-pip
 pip install gdown --break-system-packages 2>/dev/null || pip install gdown || pip3 install gdown
+
 # 1. Cargar y verificar el archivo .env
 if [ ! -f .env ]; then
     echo " -> [ERROR] No se encontró el archivo .env en el directorio actual."
@@ -15,9 +18,9 @@ if [ ! -f .env ]; then
 fi
 
 export $(grep -v '^#' .env | grep -v '^$' | xargs)
-TARGET_CONTAINER="${CONTAINER_NAME}"
+TARGET_CONTAINER="${CONTAINER_NAME:-cms_backend}"
 
-# Función helper para descargar desde Google Drive superando la pantalla de virus
+# Función helper para descargar desde Google Drive
 download_from_drive() {
     local url="$1"
     local output_file="$2"
@@ -58,6 +61,13 @@ if [ -z "$(ls -A wp-content/themes 2>/dev/null)" ]; then
         echo " -> Descomprimiendo themes.tar.gz..."
         tar -xzf themes.tar.gz -C wp-content/themes/
         rm -f themes.tar.gz
+        
+        # Desanidar en host si la carpeta .tar.gz contenía una subcarpeta 'themes'
+        if [ -d "wp-content/themes/themes" ]; then
+            echo " -> Aplanando estructura de carpetas en temas..."
+            mv wp-content/themes/themes/* wp-content/themes/
+            rm -rf wp-content/themes/themes
+        fi
         echo " -> Temas descomprimidos con éxito."
     else
         echo " -> [AVISO] wp-content/themes está vacío y no se definió LINK_DOWNLOAD_THEMES."
@@ -76,14 +86,21 @@ if [ -z "$(ls -A wp-content/plugins 2>/dev/null)" ]; then
         echo " -> Descomprimiendo plugins.tar.gz..."
         tar -xzf plugins.tar.gz -C wp-content/plugins/
         rm -f plugins.tar.gz
+        
+        # Desanidar en host si la carpeta .tar.gz contenía una subcarpeta 'plugins'
+        if [ -d "wp-content/plugins/plugins" ]; then
+            echo " -> Aplanando estructura de carpetas en plugins..."
+            mv wp-content/plugins/plugins/* wp-content/plugins/
+            rm -rf wp-content/plugins/plugins
+        fi
         echo " -> Plugins descomprimidos con éxito."
     else
         echo " -> [AVISO] wp-content/plugins está vacío y no se definió LINK_DOWNLOAD_PLUGINS."
     fi
 fi
 
-# 5. Sincronización hacia el contenedor y asignación de permisos
-echo "[5/5] Copiando temas y plugins al contenedor '${TARGET_CONTAINER}'..."
+# 5. Sincronización hacia el contenedor, desanidamiento interno, Apache Exporter y permisos
+echo "[5/5] Configurando archivos y servicios en el contenedor '${TARGET_CONTAINER}'..."
 
 if [ "$(ls -A wp-content/themes 2>/dev/null)" ]; then
     docker cp wp-content/themes/. "${TARGET_CONTAINER}:/var/www/html/wp-content/themes/"
@@ -93,10 +110,34 @@ if [ "$(ls -A wp-content/plugins 2>/dev/null)" ]; then
     docker cp wp-content/plugins/. "${TARGET_CONTAINER}:/var/www/html/wp-content/plugins/"
 fi
 
+echo " -> Verificando y aplanando carpetas anidadas en el contenedor..."
+docker exec "${TARGET_CONTAINER}" bash -c '
+if [ -d "/var/www/html/wp-content/themes/themes" ]; then
+    mv /var/www/html/wp-content/themes/themes/* /var/www/html/wp-content/themes/
+    rm -rf /var/www/html/wp-content/themes/themes
+fi
+if [ -d "/var/www/html/wp-content/plugins/plugins" ]; then
+    mv /var/www/html/wp-content/plugins/plugins/* /var/www/html/wp-content/plugins/
+    rm -rf /var/www/html/wp-content/plugins/plugins
+fi
+'
+
+echo " -> Habilitando endpoint /server-status para Apache Exporter..."
+docker exec "${TARGET_CONTAINER}" bash -c 'cat <<EOF > /etc/apache2/conf-available/server-status.conf
+<Location /server-status>
+    SetHandler server-status
+    Require all granted
+    RewriteEngine Off
+</Location>
+EOF
+a2enmod status >/dev/null 2>&1 || true
+a2enconf server-status >/dev/null 2>&1 || true
+apache2ctl graceful >/dev/null 2>&1 || true'
+
 echo " -> Asignando propiedad www-data:www-data dentro del contenedor..."
 docker exec "${TARGET_CONTAINER}" chown -R www-data:www-data /var/www/html/wp-content
 
 echo "=================================================="
 echo " Despliegue completado correctamente!             "
-echo " Access URL: https://${DOMAIN} "
+echo " Access URL: https://${DOMAIN:-nodosur.tas02.lab} "
 echo "=================================================="
