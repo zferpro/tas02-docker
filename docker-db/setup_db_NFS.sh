@@ -53,14 +53,14 @@ echo "[5/5] Verificando archivo de configuración (.my.cnf)..."
 if [ ! -f .my.cnf ]; then
     if [ -f .my.cnf.example ]; then
         cp .my.cnf.example .my.cnf
-        chmod 600 .my.cnf
-        echo " -> Creado archivo .my.cnf desde .my.cnf.example (permisos 600 asegurados)."
+        chmod 644 .my.cnf
+        echo " -> Creado archivo .my.cnf desde .my.cnf.example (permisos 644 asegurados)."
     else
         echo " -> ERROR: No se encontró el archivo .my.cnf ni .my.cnf.example"
         exit 1
     fi
 else
-    chmod 600 .my.cnf 2>/dev/null || true
+    chmod 644 .my.cnf
 fi
 
 echo "========================================================="
