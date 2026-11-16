@@ -3,7 +3,7 @@ groups:
     rules:
       # 1. Alerta de caída de Backend CMS
       - alert: BackendCMSDown
-        expr: haproxy_server_status{proxy="wp_backends"} == 0
+        expr: haproxy_server_status{proxy="wp_backends", state="UP"} == 0
         for: 10s
         labels:
           severity: critical
