@@ -1,6 +1,6 @@
 $TTL    604800
 @       IN      SOA     dns.tas02.lab. admin.tas02.lab. (
-                     1910202601         ; Serial
+                     2026111601         ; Serial
                          604800         ; Refresh
                           86400         ; Retry
                         2419200         ; Expire
@@ -19,3 +19,4 @@ prom.tas02.lab.    IN      A       10.33.199.21
 grafana.tas02.lab.     IN      A       10.33.195.253
 prometheus.tas02.lab.  IN      A       10.33.195.253
 nodosur.tas02.lab.     IN      A       10.33.195.253
+mail.tas02.lab.        IN      A       10.33.195.253
