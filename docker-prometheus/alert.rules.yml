@@ -3,25 +3,25 @@ groups:
     rules:
       # 1. Alerta de caída de Backend CMS
       - alert: BackendCMSDown
-        expr: haproxy_server_status{backend="wp_backends"} == 0
+        expr: haproxy_server_status{proxy="wp_backends"} == 0
         for: 10s
         labels:
           severity: critical
           responsable: sysadmin
         annotations:
-          summary: "Un backend web de WordPress ha caído"
-          description: "El backend {{ $labels.server }} en HAProxy no responde a los health checks."
+          summary: "Backend web {{ $labels.server }} fuera de servicio"
+          description: "HAProxy detectó que {{ $labels.server }} no responde a los health checks HTTP"
 
       # 2. Alerta de capacidad de disco / NFS
       - alert: DiscoNFSProximoALlenarse
-        expr: (node_filesystem_free_bytes{mountpoint=~".*uploads.*"} / node_filesystem_size_bytes) * 100 < 15
+        expr: (node_filesystem_avail_bytes{instance="10.33.199.19:9100", mountpoint="/"} / node_filesystem_size_bytes{instance="10.33.199.19:9100", mountpoint="/"}) * 100 < 15
         for: 1m
         labels:
           severity: warning
           responsable: storage_admin
         annotations:
-          summary: "Almacenamiento NFS bajo en capacidad"
-          description: "El espacio libre en el volumen NFS de la BD es menor al 15%."
+          summary: "Espacio en disco crítico en db-tas02 (NFS/MariaDB)"
+          description: "El espacio disponible en / de 10.33.199.19 es inferior al 15%."
 
       # 3. Alerta de saturación de CPU en MVs
       - alert: CPUSaturada
@@ -43,4 +43,37 @@ groups:
           responsable: dba
         annotations:
           summary: "Servicio MariaDB fuera de línea"
-          description: "El contenedor de Base de Datos en 10.33.199.19 no responde."
+          description: "La base de datos en db-tas02 (10.33.199.19) no responde"
+      # 5. Caída de BIND9 DNS
+      - alert: Bind9DNSDown
+        expr: bind_up == 0
+        for: 10s
+        labels:
+          severity: critical
+          responsable: sysadmin
+        annotations:
+          summary: "Servidor DNS BIND9 caído"
+          description: "El servicio DNS en dns-tas02 (10.33.199.17) dejó de responder."
+
+      # 6. Caída de Nodo o Exporter
+      - alert: InstanciaCaida
+        expr: up == 0
+        for: 30s
+        labels:
+          severity: critical
+          responsable: sysadmin
+        annotations:
+          summary: "Objetivo {{ $labels.job }} ({{ $labels.instance }}) inalcanzable"
+          description: "Prometheus perdió comunicación con {{ $labels.instance }} durante más de 30s."
+
+      # 7. Fallo o retraso en Respaldos Automáticos (Meta RPO <= 24h)
+      - alert: RespaldoFallidoOAntiguo
+        expr: nodosur_backup_status == 0 or ((time() - nodosur_backup_last_success_timestamp) / 3600) > 25
+        for: 1m
+        labels:
+          severity: warning
+          responsable: storage_admin
+        annotations:
+          summary: "Problema con el respaldo automático de Nodo Sur"
+          description: "El último respaldo falló o supera las 25 horas de antigüedad (compromete RPO 24h)."
+      

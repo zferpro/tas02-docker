@@ -1,0 +1,44 @@
+global:
+  smtp_smarthost: 'mailpit:1025'
+  smtp_from: 'alertas-nodosur@tas02.lab'
+  smtp_require_tls: false
+
+route:
+  group_by: ['alertname', 'responsable']
+  group_wait: 10s
+  group_interval: 30s
+  repeat_interval: 1h
+  receiver: 'equipo-sysadmin'
+  routes:
+    # Escalamiento inmediato a guardia crítica sin detener el envío al especialista
+    - match:
+        severity: critical
+      receiver: 'escalamiento-critico'
+      continue: true
+    - match:
+        responsable: dba
+      receiver: 'equipo-dba'
+    - match:
+        responsable: storage_admin
+      receiver: 'equipo-storage'
+
+receivers:
+  - name: 'equipo-sysadmin'
+    email_configs:
+      - to: 'sysadmin@tas02.lab'
+        send_resolved: true
+
+  - name: 'equipo-dba'
+    email_configs:
+      - to: 'dba@tas02.lab'
+        send_resolved: true
+
+  - name: 'equipo-storage'
+    email_configs:
+      - to: 'storage@tas02.lab'
+        send_resolved: true
+
+  - name: 'escalamiento-critico'
+    email_configs:
+      - to: 'guardia-critica@tas02.lab'
+        send_resolved: true

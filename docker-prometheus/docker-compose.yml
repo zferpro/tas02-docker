@@ -52,10 +52,7 @@ services:
       - /dev/disk/:/dev/disk:ro
     ports:
       - "10.33.199.21:8080:8080"
-
-
-
-  #
+  
   grafana:
     image: grafana/grafana:13.2
     container_name: grafana_server
@@ -71,6 +68,29 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
+  alertmanager:
+    image: prom/alertmanager:v0.35.0
+    container_name: alertmanager
+    restart: always
+    networks:
+      - prom_net
+    ports:
+      - "10.33.199.21:9093:9093"
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+
+  mailpit:
+    image: axllent/mailpit:v1.33
+    container_name: mailpit_smtp
+    networks:
+      - prom_net
+    restart: always
+    ports:
+      - "10.33.199.21:1025:1025"  # Puerto SMTP solo accesible desde la LAN privada 10.33.199.16/29
+      - "10.33.199.21:8025:8025"              # Bandeja Web de correos
 networks:
   prom_net:
     driver: bridge
