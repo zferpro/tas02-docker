@@ -112,4 +112,4 @@ services:
 
 volumes:
   alloy_data:
-  driver: local
+    driver: local
