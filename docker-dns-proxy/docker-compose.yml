@@ -13,6 +13,11 @@ services:
       - ./bind/named.conf.options:/etc/bind/named.conf.options:ro
       - ./bind/named.conf.local:/etc/bind/named.conf.local:ro
       - ./bind/zones:/etc/bind/zones:ro
+    logging:
+          driver: "json-file"
+          options:
+            max-size: "10m"
+            max-file: "5"
 
   haproxy:
     image: haproxy:2.8-alpine
@@ -25,6 +30,11 @@ services:
     volumes:
       - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
       - ./haproxy/certs:/etc/ssl/haproxy:ro
+    logging:
+          driver: "json-file"
+          options:
+            max-size: "10m"
+            max-file: "5"
 
   node_exporter:
     image: prom/node-exporter:v1.12.1
@@ -40,6 +50,11 @@ services:
       - '--path.sysfs=/host/sys'
       - '--path.rootfs=/rootfs'
       - '--web.listen-address=10.33.199.17:9100'
+    logging:
+          driver: "json-file"
+          options:
+            max-size: "10m"
+            max-file: "5"
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.54.1
@@ -59,6 +74,12 @@ services:
       - /dev/disk/:/dev/disk:ro
     ports:
       - "10.33.199.17:8080:8080"
+    logging:
+          driver: "json-file"
+          options:
+            max-size: "10m"
+            max-file: "5"
+  
   bind_exporter:
     image: prometheuscommunity/bind-exporter:v0.8.0
     container_name: bind_exporter
@@ -67,3 +88,28 @@ services:
       - "10.33.199.17:9119:9119"
     command:
       - "--bind.stats-url=http://bind9:8053/"
+    logging:
+          driver: "json-file"
+          options:
+            max-size: "10m"
+            max-file: "5"
+  alloy:
+      image: grafana/alloy:v1.22.0
+      container_name: alloy_agent
+      restart: always
+      ports:
+        - "10.33.199.17:12345:12345"
+      volumes:
+        - ./alloy/config.alloy:/etc/alloy/config.alloy:ro
+        - /var/run/docker.sock:/var/run/docker.sock:ro
+        - alloy_data:/var/lib/alloy/data
+      command: run --server.http.listen-addr=0.0.0.0:12345 --storage.path=/var/lib/alloy/data /etc/alloy/config.alloy
+      logging:
+        driver: "json-file"
+        options:
+          max-size: "10m"
+          max-file: "5"
+
+volumes:
+  alloy_data:
+  driver: local

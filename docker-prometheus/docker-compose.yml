@@ -16,6 +16,11 @@ services:
       - '--storage.tsdb.path=/prometheus'
       - '--storage.tsdb.retention.time=15d'
       - '--web.enable-lifecycle'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"              
 
   node_exporter:
     image: prom/node-exporter:v1.12.1
@@ -33,6 +38,11 @@ services:
       - '--path.rootfs=/rootfs'
       - '--collector.textfile.directory=/textfile_collector'
       - '--web.listen-address=10.33.199.21:9100'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"              
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.54.1
@@ -52,6 +62,11 @@ services:
       - /dev/disk/:/dev/disk:ro
     ports:
       - "10.33.199.21:8080:8080"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"              
   
   grafana:
     image: grafana/grafana:13.2
@@ -68,6 +83,12 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"              
+
   alertmanager:
     image: prom/alertmanager:v0.35.0
     container_name: alertmanager
@@ -81,6 +102,11 @@ services:
     command:
       - '--config.file=/etc/alertmanager/alertmanager.yml'
       - '--storage.path=/alertmanager'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"              
 
   mailpit:
     image: axllent/mailpit:v1.33
@@ -90,7 +116,49 @@ services:
     restart: always
     ports:
       - "10.33.199.21:1025:1025"  # Puerto SMTP solo accesible desde la LAN privada 10.33.199.16/29
-      - "10.33.199.21:8025:8025"              # Bandeja Web de correos
+      - "10.33.199.21:8025:8025"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"              
+
+  loki:
+      image: grafana/loki:3.7.10
+      container_name: loki_server
+      restart: always
+      networks:
+        - prom_net
+      ports:
+        - "10.33.199.21:3100:3100"
+      volumes:
+        - ./loki/loki-config.yml:/etc/loki/local-config.yaml:ro
+        - loki_data:/loki
+      command: -config.file=/etc/loki/local-config.yaml
+      logging:
+        driver: "json-file"
+        options:
+          max-size: "10m"
+          max-file: "5"
+
+  alloy:
+      image: grafana/alloy:v1.22.0
+      container_name: alloy_agent
+      restart: always
+      ports:
+        - "10.33.199.21:12345:12345"
+      volumes:
+        - ./alloy/config.alloy:/etc/alloy/config.alloy:ro
+        - /var/run/docker.sock:/var/run/docker.sock:ro
+        - alloy_data:/var/lib/alloy/data
+      command: run --server.http.listen-addr=0.0.0.0:12345 --storage.path=/var/lib/alloy/data /etc/alloy/config.alloy
+      logging:
+        driver: "json-file"
+        options:
+          max-size: "10m"
+          max-file: "5"
+  
+
 networks:
   prom_net:
     driver: bridge
@@ -101,4 +169,8 @@ volumes:
   prometheus_data:
     driver: local
   grafana_data:
+    driver: local
+  loki_data:
+    driver: local
+  alloy_data:
     driver: local

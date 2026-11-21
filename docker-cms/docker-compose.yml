@@ -5,6 +5,8 @@ volumes:
       type: nfs
       o: "addr=10.33.199.19,rw,nfsvers=4,async"
       device: ":/"
+  alloy_data:
+    driver: local
 
 services:
   wordpress:
@@ -28,6 +30,12 @@ services:
         }
     volumes:
       - wp_uploads:/var/www/html/wp-content/uploads
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
   node_exporter:
     image: prom/node-exporter:v1.12.1
     container_name: node_exporter
@@ -42,6 +50,11 @@ services:
       - '--path.sysfs=/host/sys'
       - '--path.rootfs=/rootfs'
       - '--web.listen-address=${CONTAINER_IP}:9100'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.54.1
@@ -61,7 +74,12 @@ services:
       - /dev/disk/:/dev/disk:ro
     ports:
       - "${CONTAINER_IP}:8080:8080"
-  
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
   apache_exporter:
     image: lusotycoon/apache-exporter:v1.1.1
     container_name: apache_exporter
@@ -70,3 +88,27 @@ services:
       - "${CONTAINER_IP}:9117:9117"
     command:
       - "--scrape_uri=http://${CONTAINER_NAME}:80/server-status?auto"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  alloy:
+    image: grafana/alloy:v1.22.0
+    container_name: alloy_agent
+    restart: always
+    environment:
+      - MV_HOSTNAME=${MV_HOSTNAME}
+    ports:
+      - "${CONTAINER_IP}:12345:12345"
+    volumes:
+      - ./alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - alloy_data:/var/lib/alloy/data
+    command: run --server.http.listen-addr=0.0.0.0:12345 --storage.path=/var/lib/alloy/data /etc/alloy/config.alloy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
