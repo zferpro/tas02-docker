@@ -1,7 +1,5 @@
 # 🚀 Proyecto Nodo Sur - Plataforma Web Resiliente con Docker
 
----
-
 ## 📋 Descripción General
 
 Este repositorio contiene la infraestructura como código (Docker Compose, configuraciones de servicios y scripts de despliegue/respaldo) para la plataforma **Nodo Sur** bajo el dominio interno **`tas02.lab`**.
