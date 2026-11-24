@@ -1,13 +1,5 @@
 # 🚀 Proyecto Nodo Sur - Plataforma Web Resiliente con Docker
 
-## 📌 COSAS QUE FALTAN:
-- **Item 1 rúbrica (FRAN):** Realizar y verificar TODOS los gráficos, generar el código JSON de los dashboards y ponerlos en `docker-prometheus/grafana/provisioning/dashboards/nodosur-operativo.json`, aparte realizar análisis de los gráficos (saber qué significa cada uno).
-- **Item 2 rúbrica (FABIAN):** Revisar reglas del Alertmanager y realizar prueba de falla (documentar con imágenes en el documento):
-  1. Mostrar que todo está bien y las alertas están inactivas.
-  2. Generar una falla y detectar la hora exacta donde se produjo.
-  3. Verificar que llegue un e-mail a `mail.tas02.lab` con correos dirigidos y que en Grafana se muestre la falla (ej. `BackendCMSDown`).
-  4. Recuperar el servicio o arreglar la falla y verificar que lleguen correos de aviso (`RESOLVED`) a los responsables.
-
 ---
 
 ## 📋 Descripción General
