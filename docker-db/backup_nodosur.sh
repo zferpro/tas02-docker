@@ -37,6 +37,6 @@ ssh -i "$LLAVE_SSH" tas02@"$IP_MONITORING" "find $CARPETA_REMOTA -mindepth 1 -ma
 
 echo "=== [6/6] Actualizando metrica en Prometheus ==="
 AHORA=$(date -u +%s)
-ssh -i "$LLAVE_SSH" tas02@"$IP_MONITORING" "printf 'nodosur_backup_status 1\nnodosur_backup_last_success_timestamp %s\n' '$AHORA' > $ARCHIVO_PROM"
-
+TAMANO_BYTES=$(du -sb "$CARPETA_LOCAL" | cut -f1)
+ssh -i "$LLAVE_SSH" tas02@"$IP_MONITORING" "mkdir -p /home/tas02/node_exporter/textfile_collector && printf 'nodosur_backup_status 1\nnodosur_backup_last_success_timestamp %s\nnodosur_backup_size_bytes %s\n' '$AHORA' '$TAMANO_BYTES' > $ARCHIVO_PROM"
 echo "=== Respaldo finalizado correctamente ==="
